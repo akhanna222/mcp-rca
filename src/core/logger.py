@@ -7,6 +7,7 @@ This module provides production-grade logging with:
 - Correlation IDs for distributed tracing
 """
 
+import asyncio
 import json
 import logging
 import sys
@@ -305,7 +306,3 @@ def log_execution_time(logger: Optional[RCALogger] = None) -> Callable:
         return sync_wrapper
 
     return decorator
-
-
-# Import asyncio at the end to avoid circular imports
-import asyncio
