@@ -1,0 +1,207 @@
+# Example configuration for monitoring multiple projects across environments
+# Demonstrates concurrent monitoring of staging and production environments
+
+version: "1.0.0"
+
+anthropic:
+  model: "claude-3-7-sonnet-20250219"
+  max_tokens: 8192
+  timeout_seconds: 300.0
+  max_retries: 3
+
+alerts:
+  enabled: true
+  host: "0.0.0.0"
+  port: 5000
+  path: "/alert"
+  max_concurrent_alerts: 20  # Higher limit for multi-project
+
+observability:
+  enabled: true
+  metrics_port: 9090
+  log_level: "INFO"
+  log_format: "json"
+  structured_logging: true
+  trace_enabled: false
+
+prompt_templates_dir: "./prompts"
+
+# Multiple projects
+projects:
+  # Production environment
+  - name: "prod-us-east"
+    display_name: "Production US East"
+    description: "Production environment in US East region"
+    provider: "gcp"
+    enabled: true
+
+    gcp:
+      project_id: "prod-project-us-east"
+      auth:
+        method: "default_credentials"
+        quota_project_id: "prod-project-us-east"
+
+      monitoring:
+        enabled: true
+        timeout_seconds: 60.0
+        max_concurrent_queries: 15
+
+        queries:
+          - name: "API Latency"
+            purpose: "Monitor API endpoint latency"
+            query: 'histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))'
+            enabled: true
+
+          - name: "Error Rate"
+            purpose: "Monitor API error rate"
+            query: 'sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))'
+            enabled: true
+
+          - name: "GKE Pod CPU"
+            purpose: "Monitor Kubernetes pod CPU"
+            query: 'max by (pod_name)(container_cpu_usage_seconds_total{monitored_resource="k8s_container"})'
+            enabled: true
+
+      logging:
+        enabled: true
+        default_time_range_minutes: 10.0
+        max_log_entries: 1000
+
+        filters:
+          - name: "Service Errors"
+            purpose: "Critical service errors"
+            filter_query: 'resource.type="k8s_container" severity>=ERROR'
+            enabled: true
+
+    labels:
+      environment: "production"
+      region: "us-east"
+      criticality: "critical"
+
+  # Staging environment
+  - name: "staging-us-east"
+    display_name: "Staging US East"
+    description: "Staging environment for pre-production testing"
+    provider: "gcp"
+    enabled: true
+
+    gcp:
+      project_id: "staging-project-us-east"
+      auth:
+        method: "default_credentials"
+        quota_project_id: "staging-project-us-east"
+
+      monitoring:
+        enabled: true
+        timeout_seconds: 60.0
+        max_concurrent_queries: 10
+
+        queries:
+          - name: "API Latency"
+            purpose: "Monitor API endpoint latency"
+            query: 'histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))'
+            enabled: true
+
+          - name: "Error Rate"
+            purpose: "Monitor API error rate"
+            query: 'sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))'
+            enabled: true
+
+      logging:
+        enabled: true
+        default_time_range_minutes: 15.0
+        max_log_entries: 500
+
+        filters:
+          - name: "Service Errors"
+            purpose: "Service errors in staging"
+            filter_query: 'resource.type="k8s_container" severity>=ERROR'
+            enabled: true
+
+    labels:
+      environment: "staging"
+      region: "us-east"
+      criticality: "medium"
+
+  # Development environment
+  - name: "dev-shared"
+    display_name: "Shared Development"
+    description: "Shared development environment"
+    provider: "gcp"
+    enabled: true
+
+    gcp:
+      project_id: "dev-project-shared"
+      auth:
+        method: "default_credentials"
+
+      monitoring:
+        enabled: true
+        timeout_seconds: 30.0
+        max_concurrent_queries: 5
+
+        queries:
+          - name: "Basic Health"
+            purpose: "Basic service health check"
+            query: 'up{job="api-server"}'
+            enabled: true
+
+      logging:
+        enabled: true
+        default_time_range_minutes: 5.0
+        max_log_entries: 200
+
+        filters:
+          - name: "Errors"
+            purpose: "Any errors"
+            filter_query: 'severity>=ERROR'
+            enabled: true
+
+    labels:
+      environment: "development"
+      criticality: "low"
+
+  # Multi-region production
+  - name: "prod-eu-west"
+    display_name: "Production EU West"
+    description: "Production environment in EU West region"
+    provider: "gcp"
+    enabled: true
+
+    gcp:
+      project_id: "prod-project-eu-west"
+      auth:
+        method: "default_credentials"
+        quota_project_id: "prod-project-eu-west"
+
+      monitoring:
+        enabled: true
+        timeout_seconds: 60.0
+        max_concurrent_queries: 15
+
+        queries:
+          - name: "API Latency"
+            purpose: "Monitor API endpoint latency"
+            query: 'histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))'
+            enabled: true
+
+          - name: "Error Rate"
+            purpose: "Monitor API error rate"
+            query: 'sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))'
+            enabled: true
+
+      logging:
+        enabled: true
+        default_time_range_minutes: 10.0
+        max_log_entries: 1000
+
+        filters:
+          - name: "Service Errors"
+            purpose: "Critical service errors"
+            filter_query: 'resource.type="k8s_container" severity>=ERROR'
+            enabled: true
+
+    labels:
+      environment: "production"
+      region: "eu-west"
+      criticality: "critical"

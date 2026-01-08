@@ -1,0 +1,124 @@
+# Example configuration for a single GCP project
+# This is the simplest configuration for monitoring one Google Cloud project
+
+version: "1.0.0"
+
+# Anthropic/Claude configuration
+anthropic:
+  # API key can be set here or via ANTHROPIC_API_KEY environment variable
+  # api_key: "sk-ant-..."  # NOT RECOMMENDED: Use env var instead
+  model: "claude-3-7-sonnet-20250219"
+  max_tokens: 8192
+  timeout_seconds: 300.0
+  max_retries: 3
+
+# Alert webhook configuration
+alerts:
+  enabled: true
+  host: "0.0.0.0"
+  port: 5000
+  path: "/alert"
+  # Optional: Bearer token for webhook authentication
+  # auth_token: "your-secret-token-here"
+  max_concurrent_alerts: 10
+
+# Platform observability
+observability:
+  enabled: true
+  metrics_port: 9090
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  log_format: "json"  # json or text
+  structured_logging: true
+  trace_enabled: false
+
+# Directory for prompt templates (optional)
+prompt_templates_dir: "./prompts"
+
+# Projects to monitor
+projects:
+  - name: "production-app"
+    display_name: "Production Application"
+    description: "Main production application on GCP"
+    provider: "gcp"
+    enabled: true
+
+    # GCP-specific configuration
+    gcp:
+      project_id: "my-gcp-project-id"
+
+      # Authentication
+      auth:
+        method: "default_credentials"  # or "service_account"
+        # For service account:
+        # service_account_path: "/path/to/service-account.json"
+        quota_project_id: "my-gcp-project-id"
+        scopes:
+          - "https://www.googleapis.com/auth/cloud-platform"
+
+      # Monitoring configuration
+      monitoring:
+        enabled: true
+        timeout_seconds: 60.0
+        max_concurrent_queries: 10
+
+        # Predefined monitoring queries
+        queries:
+          - name: "Instance Group CPU"
+            purpose: "Check CPU utilization of VM instances"
+            query: 'max by (metadata_system_instance_group)(max_over_time(compute_googleapis_com:instance_cpu_utilization{monitored_resource="gce_instance",metadata_user_app="prod_app"}[5m]))[5m:5m]'
+            enabled: true
+
+          - name: "Instance Group Memory"
+            purpose: "Check memory usage of VM instances"
+            query: 'max by (metadata_system_instance_group)(max_over_time(agent_googleapis_com:memory_percent_used{monitored_resource="gce_instance",metadata_user_app="prod_app"}[5m]))[5m:5m]'
+            enabled: true
+
+          - name: "Cloud SQL CPU"
+            purpose: "Check database CPU utilization"
+            query: 'max by (database_id)(max_over_time(cloudsql_googleapis_com:database_cpu_utilization{monitored_resource="cloudsql_database"}[5m]))[5m:5m]'
+            enabled: true
+
+          - name: "Cloud SQL Memory"
+            purpose: "Check database memory utilization"
+            query: 'max by (database_id)(max_over_time(cloudsql_googleapis_com:database_memory_utilization{monitored_resource="cloudsql_database"}[5m]))[5m:5m]'
+            enabled: true
+
+          - name: "Load Balancer Latency"
+            purpose: "Check HTTP load balancer latency"
+            query: 'max(max_over_time(loadbalancing_googleapis_com:https_backend_latencies{monitored_resource="https_lb_rule"}[5m]))[5m:5m]'
+            enabled: true
+
+      # Logging configuration
+      logging:
+        enabled: true
+        default_time_range_minutes: 10.0
+        max_log_entries: 1000
+        timeout_seconds: 60.0
+
+        # Predefined log filters
+        filters:
+          - name: "Application Errors"
+            purpose: "Retrieve application error logs"
+            filter_query: 'logName="projects/my-gcp-project-id/logs/application" AND severity>=ERROR'
+            enabled: true
+
+          - name: "Python Errors"
+            purpose: "Retrieve Python runtime errors"
+            filter_query: 'logName="projects/my-gcp-project-id/logs/python" AND severity=ERROR'
+            enabled: true
+
+          - name: "System Errors"
+            purpose: "Retrieve system-level errors"
+            filter_query: 'logName="projects/my-gcp-project-id/logs/syslog" AND severity>=ERROR'
+            enabled: true
+
+    # Custom labels for organization
+    labels:
+      environment: "production"
+      team: "platform"
+      criticality: "high"
+
+    # Alert routing configuration (optional)
+    alert_routing:
+      slack_channel: "#alerts-production"
+      pagerduty_service: "prod-app"

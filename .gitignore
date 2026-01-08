@@ -172,3 +172,14 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Project-specific
+google_observability.log
+config/platform.yaml
+config/platform.json
+*.json.key
+service-account*.json
+.DS_Store
+
+# Temporary files
+mcp-rca-temp/
