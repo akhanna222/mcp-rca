@@ -107,17 +107,44 @@ MCP-RCA is a production-ready platform that automates root cause analysis for cl
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### Option 1: One-Command Setup (Recommended for AWS EC2)
 
+**Deploy to AWS EC2 in 10 minutes** with our automated setup script:
+
+```bash
+# Clone repository
+git clone https://github.com/akhanna222/mcp-rca.git
+cd mcp-rca
+
+# Run automated setup (interactive)
+sudo bash scripts/setup_ec2.sh
+```
+
+The script will:
+- ✓ Install all dependencies
+- ✓ Collect credentials interactively (Anthropic, GCP, AWS, Azure)
+- ✓ Configure the platform
+- ✓ Set up systemd service
+- ✓ Start the service
+
+**Service URL**: `http://YOUR-EC2-IP:8000`
+
+📖 **See**: [QUICKSTART.md](QUICKSTART.md) for commands, [scripts/README.md](scripts/README.md) for details
+
+---
+
+### Option 2: Manual Setup
+
+**Prerequisites:**
 - Python 3.10 or higher
-- Google Cloud Project (for GCP monitoring)
 - Anthropic API key ([Get one here](https://console.anthropic.com/))
+- Cloud provider credentials (GCP, AWS, or Azure)
 
-### Installation
+**Installation:**
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/mcp-rca.git
+git clone https://github.com/akhanna222/mcp-rca.git
 cd mcp-rca
 
 # Create virtual environment
@@ -130,43 +157,44 @@ pip install -r requirements.txt
 # Set up environment variables
 export ANTHROPIC_API_KEY="your-api-key-here"
 
-# For GCP (if using Application Default Credentials)
-gcloud auth application-default login
+# For GCP (optional)
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json"
+
+# For AWS (optional)
+export AWS_REGION="us-east-1"
+
+# For Azure (optional)
+export AZURE_SUBSCRIPTION_ID="your-subscription-id"
+export AZURE_TENANT_ID="your-tenant-id"
+export AZURE_CLIENT_ID="your-client-id"
+export AZURE_CLIENT_SECRET="your-client-secret"
 ```
 
-### Configuration
-
-1. **Create your configuration file:**
+**Configuration:**
 
 ```bash
+# Copy example configuration
 cp examples/config_single_project_gcp.yaml config/platform.yaml
+
+# Edit configuration (update project IDs, credentials, etc.)
+nano config/platform.yaml
+
+# Validate configuration
+python src/cli.py validate --config config/platform.yaml
 ```
 
-2. **Edit `config/platform.yaml`** and update:
-   - GCP project ID
-   - PromQL queries for your metrics
-   - Log filters for your logging structure
-   - Alert webhook settings
-
-3. **Verify configuration:**
-
-```bash
-python -c "from src.core.config_manager import ConfigManager; ConfigManager('config/platform.yaml')"
-```
-
-### Running the Platform
+**Run the Platform:**
 
 ```bash
 # Start the RCA platform
 python src/api/server.py --config config/platform.yaml
 
 # Or with custom host/port
-python src/api/server.py --config config/platform.yaml --host 0.0.0.0 --port 8080
+python src/api/server.py --config config/platform.yaml --host 0.0.0.0 --port 8000
 ```
 
-The platform will start on `http://localhost:5000` (or your configured port) with the following endpoints:
-
-- `POST /alert` - Alert webhook endpoint
+**Endpoints:**
+- `POST /webhook` - Alert webhook endpoint
 - `GET /health` - Health check
 - `GET /metrics` - Prometheus metrics
 - `GET /projects` - List configured projects
