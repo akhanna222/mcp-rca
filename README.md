@@ -26,6 +26,7 @@ MCP-RCA is a production-ready platform that automates root cause analysis for cl
 - 🎯 **2-week payback period** with proven ROI of 2,400%
 
 **Learn More**:
+- 🔍 [The RCA Problem Explained (with real use case)](docs/THE_RCA_PROBLEM.md)
 - 📊 [Business Case & ROI Calculator](docs/BUSINESS_CASE.md)
 - 🏆 [Competitive Analysis & Market Position](docs/COMPETITIVE_PITCH.md)
 - 🎯 [Use Cases & Customer Success Stories](docs/BUSINESS_CASE.md#use-cases)
