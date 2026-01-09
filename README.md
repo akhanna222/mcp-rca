@@ -377,13 +377,6 @@ class AWSObservabilityServer(ObservabilityServer):
 
 ---
 
-## 📚 Original Blog Post
-
-This platform is inspired by and extends the concepts from the original blog post:
-[Automating Root Cause Analysis with LLMs and MCP: From Golden Signals to Intelligent Response](https://medium.com/p/b921e4d46829)
-
----
-
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
