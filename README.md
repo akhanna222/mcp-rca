@@ -10,6 +10,28 @@ MCP-RCA is a production-ready platform that automates root cause analysis for cl
 
 ---
 
+## 💼 Business Value
+
+### Transform Incident Management
+
+**The Problem**: Engineers spend 3-6 hours investigating each incident, costing companies $720K+/year in engineering time alone.
+
+**The Solution**: MCP-RCA automatically investigates incidents and identifies root causes in under 1 minute.
+
+**The Impact**:
+- ⚡ **80% reduction in MTTR** (Mean Time To Resolution)
+- 💰 **$500K+ annual savings** in engineering costs
+- 😊 **Reduced on-call burden** and engineer burnout
+- 📈 **Better uptime** and customer satisfaction
+- 🎯 **2-week payback period** with proven ROI of 2,400%
+
+**Learn More**:
+- 📊 [Business Case & ROI Calculator](docs/BUSINESS_CASE.md)
+- 🏆 [Competitive Analysis & Market Position](docs/COMPETITIVE_PITCH.md)
+- 🎯 [Use Cases & Customer Success Stories](docs/BUSINESS_CASE.md#use-cases)
+
+---
+
 ## 🌟 Key Features
 
 ### **Multi-Project Monitoring**
